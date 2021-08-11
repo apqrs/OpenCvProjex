@@ -1,16 +1,32 @@
-# This is a sample Python script.
+import cv2
+import cv2 as cv
+import mediapipe as mp
+import imutils
+import time
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+cap = cv.VideoCapture("videos/3.mp4")
+ptime = 0
+mPose = mp.solutions.pose
+pose = mPose.Pose()
+mpDraw = mp.solutions.drawing_utils
+while 1:
+    s, img = cap.read()
+    imgRGB = cv.cvtColor(img, cv2.COLOR_BGR2RGB)
+    result = pose.process(imgRGB)
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+    print(result.pose_landmarks)
 
+    if result.pose_landmarks:
+        print('#####')
+        mpDraw.draw_landmarks(img, result.pose_landmarks, mPose.POSE_CONNECTIONS)
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+    ctime = time.time()
+    fps = 1/(ctime-ptime)
+    ptime = ctime
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    cv.putText(img,str(int(fps)), (100,300),cv2.FONT_ITALIC, 10, (0,255,0), 10)
+
+    img = imutils.resize(img, height=720)
+    cv.imshow("Video", img)
+    cv.waitKey(1)
